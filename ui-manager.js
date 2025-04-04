@@ -147,6 +147,8 @@ function addSliderTouchEvents(slider) {
         e.stopPropagation();
         touchStartY = e.touches[0].clientY;
         startValue = parseFloat(slider.value);
+        // Update display immediately on touch start
+        updateSliderValue({ target: slider });
     });
     
     slider.addEventListener('touchmove', (e) => {
@@ -165,8 +167,8 @@ function addSliderTouchEvents(slider) {
         // Round to nearest step
         slider.value = Math.round(clampedValue / step) * step;
         
-        // Trigger input event for value update
-        slider.dispatchEvent(new Event('input'));
+        // Update display and audio
+        updateSliderValue({ target: slider });
     });
 }
 
@@ -226,23 +228,34 @@ function updateSliderValue(e) {
     const value = parseFloat(slider.value);
     const displayElement = document.getElementById(`${type}Value`);
     
+    // Update display value with proper formatting
     if (displayElement) {
-        displayElement.textContent = `${value} dB`;
+        if (type === 'playbackspeed') {
+            displayElement.textContent = `${value}x`;
+        } else {
+            // Show + sign for positive values
+            const sign = value > 0 ? '+' : '';
+            displayElement.textContent = `${sign}${value} dB`;
+        }
     }
 
-    // Update audio filters if audio context is running
-    if (audioContext && audioContext.state === 'running') {
-        updateAudioFilters();
+    // Update audio based on slider type
+    if (type === 'playbackspeed') {
+        if (audioSource) {
+            audioSource.playbackRate.value = value;
+        }
+    } else {
+        // Call the audio manager's update function directly
+        if (typeof window.updateAudioFilters === 'function') {
+            window.updateAudioFilters(type, value);
+        } else {
+            console.error('Audio filter update function not found');
+        }
     }
-}
 
-// Update playback speed
-function updatePlaybackSpeed(e) {
-    const speed = parseFloat(e.target.value);
-    if (audioSource) {
-        audioSource.playbackRate.value = speed;
-    }
-    uiElements.playbackSpeedValue.textContent = `${speed}x`;
+    // Add visual feedback for the slider
+    const percent = ((value - slider.min) / (slider.max - slider.min)) * 100;
+    slider.style.setProperty('--slider-percent', `${percent}%`);
 }
 
 // Handle theme change

@@ -359,42 +359,64 @@ function downloadAudio() {
 }
 
 // Update audio filters
-function updateAudioFilters() {
+window.updateAudioFilters = function(type, value) {
     try {
-        if (!bassFilter || !extremeBassFilter || !midFilter || !trebleFilter) return;
-        
-        const bassValue = parseFloat(uiElements.bassSlider.value);
-        const extremeBassValue = parseFloat(uiElements.extremeBassSlider.value);
-        const midValue = parseFloat(uiElements.midSlider.value);
-        const trebleValue = parseFloat(uiElements.trebleSlider.value);
-        
-        const currentTime = audioContext.currentTime;
-        
-        // Update filter gains with proper timing
-        bassFilter.gain.setValueAtTime(bassValue * 2, currentTime);
-        extremeBassFilter.gain.setValueAtTime(extremeBassValue * 2, currentTime);
-        midFilter.gain.setValueAtTime(midValue, currentTime);
-        trebleFilter.gain.setValueAtTime(trebleValue, currentTime);
-        
-        // Adjust compressor based on combined bass levels
-        const totalBass = bassValue + extremeBassValue;
-        if (totalBass > 40) {
-            compressor.threshold.setValueAtTime(-36, currentTime);
-            compressor.ratio.setValueAtTime(20, currentTime);
-            compressor.knee.setValueAtTime(40, currentTime);
-        } else if (totalBass > 20) {
-            compressor.threshold.setValueAtTime(-30, currentTime);
-            compressor.ratio.setValueAtTime(16, currentTime);
-            compressor.knee.setValueAtTime(30, currentTime);
-        } else {
-            compressor.threshold.setValueAtTime(-24, currentTime);
-            compressor.ratio.setValueAtTime(12, currentTime);
-            compressor.knee.setValueAtTime(20, currentTime);
+        if (!audioContext || audioContext.state !== 'running') {
+            console.warn('Audio context not ready');
+            return;
         }
+
+        const now = audioContext.currentTime;
+
+        switch (type) {
+            case 'bass':
+                if (bassFilter) {
+                    bassFilter.gain.setValueAtTime(value, now);
+                }
+                break;
+            case 'extremebass':
+                if (extremeBassFilter) {
+                    extremeBassFilter.gain.setValueAtTime(value, now);
+                }
+                break;
+            case 'mid':
+                if (midFilter) {
+                    midFilter.gain.setValueAtTime(value, now);
+                }
+                break;
+            case 'treble':
+                if (trebleFilter) {
+                    trebleFilter.gain.setValueAtTime(value, now);
+                }
+                break;
+        }
+
+        // Update compressor based on bass levels
+        if (compressor && (type === 'bass' || type === 'extremebass')) {
+            const bassValue = parseFloat(document.getElementById('bassSlider').value);
+            const extremeBassValue = parseFloat(document.getElementById('extremeBassSlider').value);
+            const totalBass = bassValue + extremeBassValue;
+
+            if (totalBass > 30) {
+                compressor.threshold.setValueAtTime(-36, now);
+                compressor.ratio.setValueAtTime(20, now);
+                compressor.knee.setValueAtTime(40, now);
+            } else if (totalBass > 15) {
+                compressor.threshold.setValueAtTime(-30, now);
+                compressor.ratio.setValueAtTime(16, now);
+                compressor.knee.setValueAtTime(30, now);
+            } else {
+                compressor.threshold.setValueAtTime(-24, now);
+                compressor.ratio.setValueAtTime(12, now);
+                compressor.knee.setValueAtTime(20, now);
+            }
+        }
+
+        console.log(`Updated ${type} filter to ${value}dB`);
     } catch (error) {
         console.error('Error updating audio filters:', error);
     }
-}
+};
 
 // Utility functions
 function formatTime(seconds) {
