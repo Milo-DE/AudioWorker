@@ -55,7 +55,8 @@ function initUIElements() {
         window.addEventListener('resize', initCanvas);
         
         // File upload events
-        uiElements.uploadButton.addEventListener('click', () => uiElements.fileInput.click());
+        uiElements.uploadButton.addEventListener('click', handleUploadClick);
+        uiElements.uploadButton.addEventListener('touchend', handleUploadClick);
         uiElements.fileInput.addEventListener('change', handleFileSelect);
         uiElements.uploadSection.addEventListener('dragover', handleDragOver);
         uiElements.uploadSection.addEventListener('drop', handleDrop);
@@ -136,6 +137,9 @@ function addTouchEventListener(element, handler) {
 function addSliderTouchEvents(slider) {
     if (!slider) return;
     
+    // Add input event listener for both touch and mouse
+    slider.addEventListener('input', updateSliderValue);
+    
     let touchStartY;
     let startValue;
     
@@ -166,23 +170,38 @@ function addSliderTouchEvents(slider) {
     });
 }
 
+// Handle upload button click
+function handleUploadClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    uiElements.fileInput.click();
+}
+
+// Handle file selection
+function handleFileSelect(e) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('audio/')) {
+            handleFileUpload(file);
+        } else {
+            showToast('Please select an audio file');
+        }
+    }
+}
+
 // Handle touch start for upload section
 function handleTouchStart(e) {
     e.preventDefault();
+    e.stopPropagation();
     uiElements.uploadSection.classList.add('dragover');
 }
 
 // Handle touch end for upload section
 function handleTouchEnd(e) {
     e.preventDefault();
+    e.stopPropagation();
     uiElements.uploadSection.classList.remove('dragover');
-}
-
-// Handle file selection
-function handleFileSelect(e) {
-    if (e.target.files.length > 0) {
-        handleFileUpload(e.target.files[0]);
-    }
 }
 
 // Handle drag over
