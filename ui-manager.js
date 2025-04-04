@@ -60,27 +60,31 @@ function initUIElements() {
         uiElements.uploadSection.addEventListener('dragover', handleDragOver);
         uiElements.uploadSection.addEventListener('drop', handleDrop);
         
-        // Playback control events
-        uiElements.playButton.addEventListener('click', playAudio);
-        uiElements.pauseButton.addEventListener('click', pauseAudio);
-        uiElements.stopButton.addEventListener('click', stopAudio);
-        uiElements.downloadButton.addEventListener('click', downloadAudio);
+        // Add touch events for mobile
+        uiElements.uploadSection.addEventListener('touchstart', handleTouchStart);
+        uiElements.uploadSection.addEventListener('touchend', handleTouchEnd);
         
-        // Slider events
-        uiElements.bassSlider.addEventListener('input', updateSliderValue);
-        uiElements.extremeBassSlider.addEventListener('input', updateSliderValue);
-        uiElements.midSlider.addEventListener('input', updateSliderValue);
-        uiElements.trebleSlider.addEventListener('input', updateSliderValue);
-        uiElements.playbackSpeed.addEventListener('input', updatePlaybackSpeed);
-        uiElements.progressBar.addEventListener('input', handleProgressClick);
+        // Playback control events with touch handling
+        addTouchEventListener(uiElements.playButton, playAudio);
+        addTouchEventListener(uiElements.pauseButton, pauseAudio);
+        addTouchEventListener(uiElements.stopButton, stopAudio);
+        addTouchEventListener(uiElements.downloadButton, downloadAudio);
+        
+        // Slider events with touch handling
+        addSliderTouchEvents(uiElements.bassSlider);
+        addSliderTouchEvents(uiElements.extremeBassSlider);
+        addSliderTouchEvents(uiElements.midSlider);
+        addSliderTouchEvents(uiElements.trebleSlider);
+        addSliderTouchEvents(uiElements.playbackSpeed);
+        addSliderTouchEvents(uiElements.progressBar);
         
         // Visualization events
-        uiElements.toggleVisualization.addEventListener('click', toggleVisualizationMode);
-        uiElements.toggleStyle.addEventListener('click', toggleVisualizationStyle);
+        addTouchEventListener(uiElements.toggleVisualization, toggleVisualizationMode);
+        addTouchEventListener(uiElements.toggleStyle, toggleVisualizationStyle);
         
         // Theme events
         uiElements.themeSelector.addEventListener('change', handleThemeChange);
-        uiElements.themePreviewButton.addEventListener('click', applyTheme);
+        addTouchEventListener(uiElements.themePreviewButton, applyTheme);
         
         // Close theme preview when clicking outside
         document.addEventListener('click', (e) => {
@@ -107,6 +111,71 @@ function initUIElements() {
     } catch (error) {
         console.error('Error initializing UI elements:', error);
     }
+}
+
+// Helper function to add touch event listeners
+function addTouchEventListener(element, handler) {
+    if (!element) return;
+    
+    element.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        element.classList.add('active');
+    });
+    
+    element.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        element.classList.remove('active');
+        handler(e);
+    });
+    
+    // Keep click for desktop
+    element.addEventListener('click', handler);
+}
+
+// Add touch events for sliders
+function addSliderTouchEvents(slider) {
+    if (!slider) return;
+    
+    let touchStartY;
+    let startValue;
+    
+    slider.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+        touchStartY = e.touches[0].clientY;
+        startValue = parseFloat(slider.value);
+    });
+    
+    slider.addEventListener('touchmove', (e) => {
+        e.stopPropagation();
+        const touchY = e.touches[0].clientY;
+        const deltaY = touchStartY - touchY;
+        const range = slider.max - slider.min;
+        const step = parseFloat(slider.step) || 1;
+        
+        // Adjust sensitivity based on range
+        const sensitivity = range / 200;
+        const newValue = startValue + (deltaY * sensitivity);
+        
+        // Clamp value to min/max
+        const clampedValue = Math.max(slider.min, Math.min(slider.max, newValue));
+        // Round to nearest step
+        slider.value = Math.round(clampedValue / step) * step;
+        
+        // Trigger input event for value update
+        slider.dispatchEvent(new Event('input'));
+    });
+}
+
+// Handle touch start for upload section
+function handleTouchStart(e) {
+    e.preventDefault();
+    uiElements.uploadSection.classList.add('dragover');
+}
+
+// Handle touch end for upload section
+function handleTouchEnd(e) {
+    e.preventDefault();
+    uiElements.uploadSection.classList.remove('dragover');
 }
 
 // Handle file selection
