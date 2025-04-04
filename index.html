@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Visualizer Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audio Visualizer Pro</h1>
+            <p>Upload your audio file and experience dynamic visualizations with enhanced bass response</p>
+        </header>
+
+        <!-- File Upload Section -->
+        <section id="uploadSection" class="upload-section">
+            <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+            <button id="uploadButton" class="btn btn-primary">
+                <span class="icon">📁</span>
+                Choose Audio File
+            </button>
+            <p class="upload-hint">or drag and drop your audio file here</p>
+            <p id="fileInfo" class="file-info"></p>
+        </section>
+
+        <!-- Visualization Section -->
+        <section class="visualization-section">
+            <canvas id="visualizationCanvas"></canvas>
+            <div class="visualization-controls">
+                <button id="toggleVisualization" class="btn btn-secondary">
+                    <span class="icon">🌊</span>
+                    Switch to Waveform
+                </button>
+                <button id="toggleStyle" class="btn btn-secondary">
+                    <span class="icon">🎨</span>
+                    Style: bars
+                </button>
+            </div>
+        </section>
+
+        <!-- Controls Section -->
+        <section class="controls-section">
+            <div class="control-group playback-controls">
+                <button id="playButton" class="btn btn-primary" disabled>
+                    <span class="icon">▶️</span>
+                    Play
+                </button>
+                <button id="pauseButton" class="btn btn-secondary" disabled>
+                    <span class="icon">⏸️</span>
+                    Pause
+                </button>
+                <button id="stopButton" class="btn btn-secondary" disabled>
+                    <span class="icon">⏹️</span>
+                    Stop
+                </button>
+                <button id="downloadButton" class="btn btn-accent" disabled>
+                    <span class="icon">💾</span>
+                    Download
+                </button>
+            </div>
+
+            <div class="control-group eq-controls">
+                <div class="slider-container">
+                    <label for="bassSlider">Bass</label>
+                    <input type="range" id="bassSlider" min="-20" max="40" value="0" step="1">
+                    <span id="bassValue" class="slider-value">0 dB</span>
+                </div>
+                <div class="slider-container">
+                    <label for="extremeBassSlider">Extreme Bass</label>
+                    <input type="range" id="extremeBassSlider" min="0" max="40" value="0" step="1">
+                    <span id="extremeBassValue" class="slider-value">0 dB</span>
+                </div>
+                <div class="slider-container">
+                    <label for="midSlider">Mid Range</label>
+                    <input type="range" id="midSlider" min="-20" max="20" value="0" step="1">
+                    <span id="midValue" class="slider-value">0 dB</span>
+                </div>
+                <div class="slider-container">
+                    <label for="trebleSlider">Treble</label>
+                    <input type="range" id="trebleSlider" min="-20" max="20" value="0" step="1">
+                    <span id="trebleValue" class="slider-value">0 dB</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="slider-container">
+                    <label for="playbackSpeed">Playback Speed</label>
+                    <input type="range" id="playbackSpeed" min="0.5" max="2" value="1" step="0.1">
+                    <span id="playbackSpeedValue" class="slider-value">1x</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="progress-container">
+                    <div class="progress-info">
+                        <span id="timeDisplay">0:00 / 0:00</span>
+                    </div>
+                    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
+                </div>
+            </div>
+        </section>
+
+        <!-- Theme Section -->
+        <section class="theme-section">
+            <div class="theme-selector">
+                <label for="themeSelector">Theme:</label>
+                <select id="themeSelector">
+                    <option value="dark">Dark Studio</option>
+                    <option value="light">Light</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="forest">Forest</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            Made with <span style="color: var(--accent-color);">❤</span> by <a href="https://github.com/Milo-DE" target="_blank">Milo-DE</a>
+        </footer>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Processing audio...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="ui-manager.js"></script>
+    <script src="audio-manager.js"></script>
+    <script src="visualization-manager.js"></script>
+</body>
+</html> 
